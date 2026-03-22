@@ -1,0 +1,35 @@
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+
+local isMobile = UserInputService.TouchEnabled or UserInputService:GetLastInputType() == Enum.UserInputType.Touch
+local isTablet = false
+
+if isMobile then
+    local screenSize = game:GetService("GuiService"):GetScreenSize()
+    if screenSize.X > 768 or screenSize.Y > 1024 then
+        isTablet = true
+    end
+end
+
+local deviceType = (isMobile or isTablet) and "mobile" or "pc"
+
+local mobileUrl = "https://raw.githubusercontent.com/HD10Z/Brainrots-laboratory/refs/heads/main/PhantomHubMobile.txt"
+local pcUrl = "https://raw.githubusercontent.com/HD10Z/Brainrots-laboratory-PC/refs/heads/main/PhantomHubPC.txt"
+
+local targetUrl = (deviceType == "mobile") and mobileUrl or pcUrl
+
+local success, scriptContent = pcall(function()
+    return game:HttpGet(targetUrl)
+end)
+
+if success and scriptContent then
+    local executeSuccess, executeError = pcall(function()
+        loadstring(scriptContent)()
+    end)
+    
+    if not executeSuccess then
+        warn("Erro ao executar script: " .. tostring(executeError))
+    end
+else
+    warn("Erro ao baixar script: " .. tostring(scriptContent))
+end
