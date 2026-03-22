@@ -1,35 +1,19 @@
 local UserInputService = game:GetService("UserInputService")
-local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
-local isMobile = UserInputService.TouchEnabled or UserInputService:GetLastInputType() == Enum.UserInputType.Touch
-local isTablet = false
+local isMobile = UserInputService.TouchEnabled
+local isTablet = isMobile and (game:GetService("GuiService"):GetScreenSize().X > 600)
 
-if isMobile then
-    local screenSize = game:GetService("GuiService"):GetScreenSize()
-    if screenSize.X > 768 or screenSize.Y > 1024 then
-        isTablet = true
-    end
-end
+local deviceType = (isMobile or isTablet) and "MOBILE" or "PC"
 
-local deviceType = (isMobile or isTablet) and "mobile" or "pc"
+local mobileScript = "https://raw.githubusercontent.com/HD10Z/Brainrots-laboratory/refs/heads/main/PhantomHubMobile.txt"
+local pcScript = "https://raw.githubusercontent.com/HD10Z/Brainrots-laboratory-PC/refs/heads/main/PhantomHubPC.txt"
 
-local mobileUrl = "https://raw.githubusercontent.com/HD10Z/Brainrots-laboratory/refs/heads/main/PhantomHubMobile.txt"
-local pcUrl = "https://raw.githubusercontent.com/HD10Z/Brainrots-laboratory-PC/refs/heads/main/PhantomHubPC.txt"
+local scriptToLoad = (deviceType == "MOBILE") and mobileScript or pcScript
 
-local targetUrl = (deviceType == "mobile") and mobileUrl or pcUrl
-
-local success, scriptContent = pcall(function()
-    return game:HttpGet(targetUrl)
-end)
-
-if success and scriptContent then
-    local executeSuccess, executeError = pcall(function()
-        loadstring(scriptContent)()
+task.spawn(function()
+    pcall(function()
+        loadstring(game:HttpGet(scriptToLoad))()
     end)
-    
-    if not executeSuccess then
-        warn("Erro ao executar script: " .. tostring(executeError))
-    end
-else
-    warn("Erro ao baixar script: " .. tostring(scriptContent))
-end
+end)
